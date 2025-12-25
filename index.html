@@ -1,315 +1,195 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
-    <style>
-        .debug-info {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(0,0,0,0.7);
-            color: white;
-            padding: 10px;
-            font-family: monospace;
-            z-index: 999;
-            pointer-events: none;
-            max-width: 80%;
-            overflow-wrap: break-word;
-        }
-        
-        .controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0,0,0,0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 10px;
-            display: flex;
-            gap: 10px;
-            z-index: 999;
-        }
-        
-        .btn {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        .btn:active {
-            background-color: #3e8e41;
-        }
-        
-        .sound-btn {
-            background-color: #ff9800;
-        }
-        
-        .hidden {
-            display: none;
-        }
-    </style>
-    <script>
-        // Global variables for model control
-        let currentScale = 0.2;
-        let currentRotationY = 0;
-        let audioPlaying = false;
-        let audioElement = null;
-        
-        window.addEventListener('DOMContentLoaded', () => {
-            // Create debug UI
-            const debugDiv = document.createElement('div');
-            debugDiv.className = 'debug-info';
-            debugDiv.innerHTML = 'Initializing...';
-            document.body.appendChild(debugDiv);
-            
-            window.updateDebug = function(text) {
-                debugDiv.innerHTML = text;
-            };
-            
-            // Create audio element
-            audioElement = document.createElement('audio');
-            audioElement.src = "https://github.com/NimeshChanuka2000/AR_Project/blob/main/asset/christmas.mp3"; // Replace with your actual MP3 URL
-            audioElement.loop = true;
-            document.body.appendChild(audioElement);
-            
-            // Create control buttons
-            createControlButtons();
-            
-            updateDebug('Waiting for model to load...');
-        });
-        
-        function createControlButtons() {
-            const controlsDiv = document.createElement('div');
-            controlsDiv.className = 'controls hidden';
-            controlsDiv.id = 'controlPanel';
-            
-            // Rotate left button
-            const rotateLeftBtn = document.createElement('button');
-            rotateLeftBtn.className = 'btn';
-            rotateLeftBtn.innerHTML = '↺';
-            rotateLeftBtn.addEventListener('click', () => rotateModel(-30));
-            
-            // Rotate right button
-            const rotateRightBtn = document.createElement('button');
-            rotateRightBtn.className = 'btn';
-            rotateRightBtn.innerHTML = '↻';
-            rotateRightBtn.addEventListener('click', () => rotateModel(30));
-            
-            // Scale up button
-            const scaleUpBtn = document.createElement('button');
-            scaleUpBtn.className = 'btn';
-            scaleUpBtn.innerHTML = '🔍+';
-            scaleUpBtn.addEventListener('click', () => scaleModel(0.05));
-            
-            // Scale down button
-            const scaleDownBtn = document.createElement('button');
-            scaleDownBtn.className = 'btn';
-            scaleDownBtn.innerHTML = '🔍-';
-            scaleDownBtn.addEventListener('click', () => scaleModel(-0.05));
-            
-            // Sound button
-            const soundBtn = document.createElement('button');
-            soundBtn.className = 'btn sound-btn';
-            soundBtn.innerHTML = '🔊';
-            soundBtn.addEventListener('click', toggleSound);
-            
-            // Add buttons to control panel
-            controlsDiv.appendChild(rotateLeftBtn);
-            controlsDiv.appendChild(rotateRightBtn);
-            controlsDiv.appendChild(scaleUpBtn);
-            controlsDiv.appendChild(scaleDownBtn);
-            controlsDiv.appendChild(soundBtn);
-            
-            document.body.appendChild(controlsDiv);
-        }
-        
-        function rotateModel(degrees) {
-            currentRotationY += degrees;
-            const beeModel = document.querySelector('#beeModel');
-            if (beeModel) {
-                const currentRotation = beeModel.getAttribute('rotation');
-                beeModel.setAttribute('rotation', {
-                    x: currentRotation.x, 
-                    y: currentRotationY, 
-                    z: currentRotation.z
-                });
-                updateDebug(`Bee rotated. Y-rotation: ${currentRotationY}°`);
-            }
-        }
-        
-        function scaleModel(delta) {
-            currentScale = Math.max(0.05, currentScale + delta);
-            const beeModel = document.querySelector('#beeModel');
-            if (beeModel) {
-                beeModel.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
-                updateDebug(`Bee scaled to: ${currentScale.toFixed(2)}`);
-            }
-        }
-        
-        function toggleSound() {
-            if (audioElement) {
-                if (audioPlaying) {
-                    audioElement.pause();
-                    audioPlaying = false;
-                    updateDebug('Bee sound paused');
-                } else {
-                    audioElement.play()
-                        .then(() => {
-                            audioPlaying = true;
-                            updateDebug('Playing bee sound');
-                        })
-                        .catch(err => {
-                            updateDebug('Error playing sound: ' + err.message);
-                        });
+<meta charset="utf-8">
+
+<!-- A-Frame -->
+<script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+<!-- AR.js (STABLE VERSION) -->
+<script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js"></script>
+
+<!-- A-Frame Extras -->
+<script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+
+<style>
+body { margin: 0; overflow: hidden; }
+
+.debug-info {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 8px;
+    font-family: monospace;
+    z-index: 999;
+}
+
+.controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    gap: 10px;
+    z-index: 999;
+}
+
+.btn {
+    background: #2ecc71;
+    border: none;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.hidden { display: none; }
+</style>
+
+<script>
+let currentScale = 0.25;
+let currentRotationY = 0;
+let audioPlaying = false;
+let audioElement;
+
+// ================= INIT =================
+window.addEventListener("DOMContentLoaded", () => {
+
+    // Debug box
+    const debug = document.createElement("div");
+    debug.className = "debug-info";
+    debug.innerText = "Initializing AR...";
+    document.body.appendChild(debug);
+    window.updateDebug = txt => debug.innerText = txt;
+
+    // Christmas music (FIXED RAW URL)
+    audioElement = document.createElement("audio");
+    audioElement.src = "https://cdn.jsdelivr.net/gh/NimeshChanuka2000/AR_Project@main/asset/christmas.mp3";
+    audioElement.loop = true;
+    document.body.appendChild(audioElement);
+
+    // Controls
+    const controls = document.createElement("div");
+    controls.className = "controls hidden";
+    controls.id = "controls";
+
+    controls.innerHTML = `
+        <button class="btn" onclick="rotateModel(-30)">↺</button>
+        <button class="btn" onclick="rotateModel(30)">↻</button>
+        <button class="btn" onclick="scaleModel(0.05)">+</button>
+        <button class="btn" onclick="scaleModel(-0.05)">−</button>
+        <button class="btn" onclick="toggleSound()">🎵</button>
+    `;
+    document.body.appendChild(controls);
+
+    updateDebug("Waiting for marker...");
+});
+
+// ================= CONTROLS =================
+function rotateModel(val) {
+    const tree = document.querySelector("#treeModel");
+    if (!tree) return;
+    currentRotationY += val;
+    tree.setAttribute("rotation", `0 ${currentRotationY} 0`);
+}
+
+function scaleModel(val) {
+    const tree = document.querySelector("#treeModel");
+    if (!tree) return;
+    currentScale = Math.max(0.1, currentScale + val);
+    tree.setAttribute("scale", `${currentScale} ${currentScale} ${currentScale}`);
+}
+
+function toggleSound() {
+    if (!audioElement) return;
+    if (audioPlaying) {
+        audioElement.pause();
+        audioPlaying = false;
+        updateDebug("Music paused");
+    } else {
+        audioElement.play();
+        audioPlaying = true;
+        updateDebug("Music playing 🎄");
+    }
+}
+
+// ================= MATERIAL FIX =================
+AFRAME.registerComponent("tree-material-fix", {
+    init() {
+        this.el.addEventListener("model-loaded", () => {
+            const model = this.el.getObject3D("mesh");
+            model.traverse(n => {
+                if (n.isMesh && n.material) {
+                    n.material.metalness = 0;
+                    n.material.roughness = 0.7;
+                    if (n.material.map) {
+                        n.material.map.encoding = THREE.sRGBEncoding;
+                        n.material.map.needsUpdate = true;
+                    }
                 }
-            }
-        }
-        
-        // Critical fix for proper color initialization in Three.js
-        AFRAME.registerComponent('scene-setup', {
-            init: function() {
-                // Access the renderer after scene initialization
-                this.el.addEventListener('loaded', () => {
-                    const renderer = this.el.renderer;
-                    if (renderer) {
-                        // Critical settings for proper color display
-                        renderer.outputEncoding = THREE.sRGBEncoding;
-                        renderer.physicallyCorrectLights = true;
-                        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                        renderer.toneMappingExposure = 1.0;
-                        updateDebug('Scene renderer configured for proper colors');
-                    }
-                });
-            }
+            });
+            updateDebug("Tree loaded 🎄");
         });
-        
-        // Special component to fix bee model materials
-        AFRAME.registerComponent('bee-material-fix', {
-            init: function() {
-                const el = this.el;
-                
-                el.addEventListener('model-loaded', () => {
-                    updateDebug('Model loaded! Fixing bee colors...');
-                    
-                    const model = el.getObject3D('mesh');
-                    if (!model) {
-                        updateDebug('Error: Could not access model mesh');
-                        return;
-                    }
-                    
-                    let materialsFixed = 0;
-                    
-                    model.traverse((node) => {
-                        if (!node.isMesh) return;
-                        
-                        // Fix for bee model colors
-                        if (node.material) {
-                            // Reset metalness which often causes dark appearance
-                            node.material.metalness = 0;
-                            
-                            // Set roughness for better material appearance
-                            node.material.roughness = 0.7;
-                            
-                            // Ensure proper color display
-                            node.material.needsUpdate = true;
-                            
-                            // Fix texture encoding if present
-                            if (node.material.map) {
-                                node.material.map.encoding = THREE.sRGBEncoding;
-                                node.material.map.needsUpdate = true;
-                            }
-                            
-                            materialsFixed++;
-                        }
-                    });
-                    
-                    updateDebug(`Fixed ${materialsFixed} materials on bee model`);
-                });
-                
-                el.addEventListener('model-error', (e) => {
-                    updateDebug('Error loading model: ' + e.detail.message);
-                });
-            }
+
+        this.el.addEventListener("model-error", e => {
+            updateDebug("Model error: " + e.detail);
         });
-        
-        // Marker handler
-        AFRAME.registerComponent('marker-handler', {
-            init: function() {
-                const marker = this.el;
-                const controlPanel = document.getElementById('controlPanel');
-                
-                marker.addEventListener('markerFound', () => {
-                    updateDebug('Marker found! Displaying interactive bee.');
-                    
-                    // Show controls when marker is found
-                    if (controlPanel) {
-                        controlPanel.classList.remove('hidden');
-                    }
-                    
-                    // Auto-play sound when marker is found (optional)
-                    // if (audioElement && !audioPlaying) {
-                    //     toggleSound();
-                    // }
-                });
-                
-                marker.addEventListener('markerLost', () => {
-                    updateDebug('Marker lost. Please find the marker again.');
-                    
-                    // Hide controls when marker is lost
-                    if (controlPanel) {
-                        controlPanel.classList.add('hidden');
-                    }
-                    
-                    // Pause sound when marker is lost (optional)
-                    // if (audioElement && audioPlaying) {
-                    //     toggleSound();
-                    // }
-                });
-            }
+    }
+});
+
+// ================= MARKER EVENTS =================
+AFRAME.registerComponent("marker-handler", {
+    init() {
+        const panel = document.getElementById("controls");
+        this.el.addEventListener("markerFound", () => {
+            panel.classList.remove("hidden");
+            updateDebug("Marker detected");
         });
-    </script>
+        this.el.addEventListener("markerLost", () => {
+            panel.classList.add("hidden");
+            updateDebug("Marker lost");
+        });
+    }
+});
+</script>
 </head>
-<body style="margin: 0; overflow: hidden;">
-    <a-scene embedded 
-             scene-setup
-             arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix;"
-             renderer="colorManagement: true; 
-                      physicallyCorrectLights: true;
-                      gammaOutput: false;">
-        
-        <a-marker type="pattern" 
-                  url="https://github.com/NimeshChanuka2000/AR_Project/blob/main/asset/pattern-marker.patt"
-                  smooth="true" 
-                  smoothcount="5" 
-                  smoothtolerance="0.01" 
-                  smooththreshold="5"
-                  marker-handler>
-            
-            <!-- Balanced lighting for proper color display -->
-            <a-entity light="type: ambient; color: #FFF; intensity: 0.7"></a-entity>
-            <a-entity light="type: directional; color: #FFF; intensity: 1.2; castShadow: true" position="1 1 1"></a-entity>
-            <a-entity light="type: hemisphere; color: #FFF; groundColor: #BBB; intensity: 0.8"></a-entity>
-            
-            <!-- Bee model with fixed materials and unique ID for reference -->
-            <a-entity 
-                id="beeModel"
-                position="0 0 0" 
-                rotation="0 0 0"
-                scale="0.2 0.2 0.2" 
-                gltf-model="https://github.com/NimeshChanuka2000/AR_Project/blob/main/asset/christmas_tree.glb"
-                animation-mixer="loop: repeat; timeScale: 1;"
-                bee-material-fix>
-            </a-entity>
-        </a-marker>
-        
-        <a-entity camera></a-entity>
-    </a-scene>
+
+<body>
+
+<a-scene
+    embedded
+    arjs="sourceType: webcam; debugUIEnabled: false;"
+    renderer="colorManagement: true; physicallyCorrectLights: true">
+
+    <a-marker
+        type="pattern"
+        url="https://cdn.jsdelivr.net/gh/NimeshChanuka2000/AR_Project@main/asset/pattern-marker.patt"
+        marker-handler>
+
+        <!-- Lighting -->
+        <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+        <a-entity light="type: directional; intensity: 1.2" position="1 2 1"></a-entity>
+
+        <!-- CHRISTMAS TREE MODEL -->
+        <a-entity
+            id="treeModel"
+            position="0 0 0"
+            rotation="0 0 0"
+            scale="0.25 0.25 0.25"
+            gltf-model="https://cdn.jsdelivr.net/gh/NimeshChanuka2000/AR_Project@main/asset/christmas_tree.glb"
+            tree-material-fix>
+        </a-entity>
+
+    </a-marker>
+
+    <a-entity camera></a-entity>
+</a-scene>
+
 </body>
 </html>
+
